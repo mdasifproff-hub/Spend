@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spend Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F6B57">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&display=swap">
+<style>
+:root{--bg:#EEF2F6;--surface:#fff;--ink:#14202B;--mute:#5B6B7A;--line:#DCE3EA;--accent:#0F6B57;--accent-ink:#fff;--warn:#C2410C;--track:#E3E9EF;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1620;--surface:#16212D;--ink:#E8EEF4;--mute:#93A4B4;--line:#243241;--accent:#3CC2A0;--accent-ink:#06231C;--warn:#FB923C;--track:#223140;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1620;--surface:#16212D;--ink:#E8EEF4;--mute:#93A4B4;--line:#243241;--accent:#3CC2A0;--accent-ink:#06231C;--warn:#FB923C;--track:#223140;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+button,input,select,textarea{font-family:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.4 Figtree,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+#app{max-width:480px;margin:0 auto;padding:18px 16px 120px}
+h1{font-size:22px;font-weight:800;margin:4px 0 14px;letter-spacing:-.01em}
+h2{font-size:15px;font-weight:700;margin:26px 0 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.hero{padding:20px 18px}
+.today{margin-top:12px;padding:14px 18px}.tv{font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.lbl{color:var(--mute);font-size:14px;margin:0}
+.note{font-size:13px;color:var(--mute);margin:8px 0 0}
+.big{font-size:48px;font-weight:800;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums;margin:2px 0 14px}
+.big.over{color:var(--warn)}.big.ok{color:var(--accent)}
+.bar{position:relative;height:12px;border-radius:6px;background:var(--track)}
+.bar>i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+.bar.over>i{background:var(--warn)}
+.bar>b{position:absolute;top:-5px;width:2px;height:22px;background:var(--ink);border-radius:1px}
+.rw{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.rw:last-child{border-bottom:0}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.grow{flex:1;min-width:0}
+.split{display:flex;justify-content:space-between;gap:8px}
+.mini{height:5px;border-radius:3px;background:var(--track);margin-top:6px;overflow:hidden}
+.mini i{display:block;height:100%}
+.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--track);margin-bottom:6px}
+.stack i{display:block;height:100%}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{min-height:38px;padding:0 12px;font-size:14px;border-radius:10px}
+.btn.arm{background:var(--warn);color:#fff;border-color:var(--warn)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.tabs a:focus-visible,.banner:focus-visible,.field:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.banner{display:block;width:100%;text-align:left;margin-bottom:12px;padding:14px 16px;border-radius:14px;border:1px solid var(--accent);background:var(--surface);color:var(--ink);font-weight:600;font-size:15px;text-decoration:none;cursor:pointer}
+.row{display:flex;gap:10px;align-items:center;margin-top:8px}
+.field{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font-weight:500;font-size:16px}
+.amt{display:flex;align-items:baseline;gap:8px;padding:14px 18px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.amt span{font-size:28px;color:var(--mute);font-weight:700}
+.amt input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);font-weight:800;font-size:44px;outline:0;font-variant-numeric:tabular-nums}
+.amt input::-webkit-outer-spin-button,.amt input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:15px;cursor:pointer}
+.chip.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--track)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.stat{padding:14px}
+.stat b{display:block;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.nav h1{margin:0}
+.nav .btn{min-width:44px;min-height:44px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabs div{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tabs a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;color:var(--mute);text-decoration:none;font-weight:600;font-size:15px}
+.tabs a[aria-current=page]{color:var(--ink);background:var(--track)}
+.tabs a.plus{background:var(--accent);color:var(--accent-ink);font-weight:800}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;z-index:9;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}.chk input{width:22px;height:22px;accent-color:var(--accent)}
+.ex .btn{flex:1}
+@media print{:root:root:root{--bg:#fff;--surface:#fff;--ink:#14202B;--mute:#5B6B7A;--line:#DCE3EA;--accent:#0F6B57;--warn:#C2410C;--track:#E3E9EF}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}.tabs,.toast,.noprint,.nav .btn,.banner,.rw .btn{display:none!important}#app{padding:0;max-width:none}.card{break-inside:avoid}}
+svg text{font-family:inherit}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast" role="status"></div>
+<nav class="tabs" aria-label="Main"><div>
+<a href="#home" data-v="home">Home</a><a href="#add" data-v="add" class="plus">+ Add</a><a href="#report" data-v="report">Report</a><a href="#setup" data-v="setup">Setup</a>
+</div></nav>
+<script>
+(function(){
+const KEY='spend-tracker-v1';
+const COLORS=['#2F6FED','#E0A100','#0F9D74','#D9480F','#8B5CF6','#DB2777','#0891B2','#64748B','#65A30D','#B45309'];
+const DEF=['Food & dining','Groceries','Transport','Bills & utilities','Shopping','Health','Entertainment','Other'];
+let S,armed=null,addCat=null,rm='',keepRm=false,lastView='',now=new Date(),tt;
+const $=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const p2=n=>String(n).padStart(2,'0');
+const mk=d=>d.getFullYear()+'-'+p2(d.getMonth()+1);
+const today=()=>{const d=new Date();return mk(d)+'-'+p2(d.getDate())};
+const loc=()=>S.cur==='INR'?'en-IN':'en-US';
+const fmt=n=>new Intl.NumberFormat(loc(),{style:'currency',currency:S.cur,minimumFractionDigits:0,maximumFractionDigits:2}).format(n);
+const sym=()=>new Intl.NumberFormat(loc(),{style:'currency',currency:S.cur}).formatToParts(0).find(p=>p.type==='currency').value;
+const mdate=m=>new Date(+m.slice(0,4),+m.slice(5,7)-1,1);
+const mlabel=m=>mdate(m).toLocaleDateString('en',{month:'long',year:'numeric'});
+const mname=m=>mdate(m).toLocaleDateString('en',{month:'long'});
+const dim=m=>new Date(+m.slice(0,4),+m.slice(5,7),0).getDate();
+const sdate=s=>new Date(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10)).toLocaleDateString('en',{day:'numeric',month:'short'});
+const shift=(m,n)=>{const d=mdate(m);d.setMonth(d.getMonth()+n);return mk(d)};
+const sum=l=>l.reduce((a,e)=>a+e.amt,0);
+const mex=m=>S.exp.filter(e=>e.date.startsWith(m));
+const cat=id=>S.cats.find(c=>c.id===id)||{name:'Uncategorised',color:'#64748B'};
+const byCat=l=>{const m={};l.forEach(e=>m[e.cat]=(m[e.cat]||0)+e.amt);return Object.entries(m).map(([id,v])=>({c:cat(id),v})).sort((a,b)=>b.v-a.v)};
+function init(force){let d=null;if(!force){try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r)}catch(e){}}
+S=d||{budget:0,cur:'INR',cats:DEF.map((n,i)=>({id:'c'+i,name:n,color:COLORS[i]})),exp:[],seen:''}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2300)}
+function arm(btn,key,fn){if(armed===key){armed=null;fn();return}armed=key;const t=btn.textContent;btn.textContent='Sure?';btn.classList.add('arm');
+setTimeout(()=>{if(armed===key){armed=null;btn.textContent=t;btn.classList.remove('arm')}},2500)}
+
+function home(){
+const m=mk(now),l=mex(m),spent=sum(l),b=S.budget,D=dim(m),day=now.getDate();
+let h;
+if(!b)h=`<div class="card hero"><p class="lbl">${mlabel(m)}</p><div class="big">${fmt(spent)}</div><p class="lbl">spent so far. Set a monthly budget to see how much is left.</p><p style="margin:14px 0 0"><a class="btn" href="#setup">Set monthly budget</a></p></div>`;
+else{const left=b-spent,over=left<0,pct=Math.min(100,spent/b*100),tick=day/D*100,diff=spent-b*day/D,pd=left/(D-day+1);
+h=`<div class="card hero"><p class="lbl">${over?'Over budget by':'Left to spend in '+mname(m)}</p><div class="big ${over?'over':'ok'}">${fmt(Math.abs(left))}</div><div class="bar ${over?'over':''}"><i style="width:${pct}%"></i><b style="left:calc(${tick}% - 1px)"></b></div><p class="lbl" style="margin:14px 0 0">${fmt(spent)} of ${fmt(b)} spent. ${diff>0?fmt(diff)+' ahead of an even pace.':fmt(-diff)+' under an even pace.'}</p>${over?'':`<p class="lbl" style="margin:4px 0 0">About ${fmt(pd)} a day for the next ${D-day+1} days.</p>`}<p class="note">The vertical line marks an even pace for today.</p></div>`}
+const pm=shift(m,-1);let bn='';
+if(S.seen!==pm&&mex(pm).length)bn=`<button class="banner" data-act="openprev">${mname(pm)}’s report is ready. Tap to view it.</button>`;
+else if(day>=D-1&&spent>0)bn=`<a class="banner" href="#report">The month ends soon. Preview this month’s report.</a>`;
+const cs=byCat(l),mx=cs[0]?cs[0].v:1;
+const ch=cs.length?cs.map(x=>`<div class="rw"><i class="dot" style="background:${x.c.color}"></i><div class="grow"><div class="split"><span>${esc(x.c.name)}</span><b>${fmt(x.v)}</b></div><div class="mini"><i style="width:${x.v/mx*100}%;background:${x.c.color}"></i></div></div></div>`).join(''):`<p class="lbl">Nothing logged yet this month. Tap Add to log your first expense.</p>`;
+const rec=[...S.exp].sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).slice(0,8);
+const rh=rec.length?rec.map(e=>`<div class="rw"><i class="dot" style="background:${cat(e.cat).color}"></i><div class="grow"><div>${esc(cat(e.cat).name)}</div><div class="note" style="margin:0">${sdate(e.date)}${e.note?': '+esc(e.note):''}</div></div><b>${fmt(e.amt)}</b><button class="btn ghost sm" data-act="del" data-id="${e.id}" aria-label="Delete expense">×</button></div>`).join(''):`<p class="lbl">Your latest expenses will show here.</p>`;
+const td=today(),tdl=S.exp.filter(e=>e.date===td),tds=sum(tdl);
+return bn+h+`<div class="card today"><div class="split"><div><p class="lbl">Spent today</p><div class="tv">${fmt(tds)}</div></div><p class="note" style="text-align:right;margin:0">${sdate(td)}<br>${tdl.length} expense${tdl.length===1?'':'s'}</p></div></div><h2>This month by category</h2><div class="card">${ch}</div><h2>Recent expenses</h2><div class="card">${rh}</div><p class="note">To fix an older entry, open Report, pick the month and scroll to All expenses.</p>`}
+
+function totText(){const t=today();return 'Today: '+fmt(sum(S.exp.filter(e=>e.date===t)))+'. This month: '+fmt(sum(mex(mk(new Date()))))+'.'}
+function add(){
+if(!S.cats.find(c=>c.id===addCat))addCat=S.cats[0]?S.cats[0].id:null;
+return `<h1>Add expense</h1><label class="amt"><span>${esc(sym())}</span><input id="amt" type="number" inputmode="decimal" step="any" min="0" placeholder="0" autocomplete="off" aria-label="Amount"></label>
+<div class="chips">${S.cats.map(c=>`<button class="chip ${c.id===addCat?'on':''}" data-act="pick" data-id="${c.id}"><i class="dot" style="background:${c.color}"></i>${esc(c.name)}</button>`).join('')}</div>
+<input id="note" class="field" maxlength="60" placeholder="Note (optional)" aria-label="Note">
+<div class="row"><input id="date" class="field" type="date" value="${today()}" max="${today()}" aria-label="Date"><button class="btn" data-act="save">Add expense</button></div>
+<p class="note" id="tot">${totText()}</p><p style="margin:18px 0 0"><a class="btn ghost" href="#home">Done</a></p>`}
+function saveExp(){
+const a=parseFloat($('#amt').value);
+if(!(a>0)){toast('Enter an amount first');$('#amt').focus();return}
+if(!addCat){toast('Add a category in Setup first');return}
+S.exp.push({id:'e'+Date.now(),amt:Math.round(a*100)/100,cat:addCat,note:$('#note').value.trim(),date:$('#date').value||today(),ts:Date.now()});
+save();toast('Added '+fmt(a)+' to '+cat(addCat).name);
+$('#amt').value='';$('#note').value='';$('#amt').focus();$('#tot').textContent=totText()}
+
+function report(){
+const m=rm,l=mex(m),spent=sum(l),b=S.budget,D=dim(m),cur=m===mk(now),days=cur?now.getDate():D;
+if(m<mk(now)&&S.seen<m){S.seen=m;save()}
+const nav=`<div class="nav"><button class="btn ghost sm" data-act="prevm" aria-label="Previous month">‹</button><h1>${mlabel(m)}</h1><button class="btn ghost sm" data-act="nextm" ${cur?'disabled':''} aria-label="Next month">›</button></div>`;
+if(!l.length)return nav+`<div class="card"><p class="lbl">No expenses logged in ${mlabel(m)}.</p></div>`+exportCard();
+let v;
+if(b){const d=b-spent,o=d<0;v=`<div class="card hero"><p class="lbl">${cur?'So far this month':'Month result'}</p><div class="big ${o?'over':'ok'}">${o?'Over by ':'Under by '}${fmt(Math.abs(d))}</div><p class="lbl" style="margin:0">${fmt(spent)} spent of your ${fmt(b)} budget (${Math.round(spent/b*100)}%).</p>${cur?'':'<p class="note">Compared with your current budget.</p>'}</div>`}
+else v=`<div class="card hero"><p class="lbl">Total spent</p><div class="big">${fmt(spent)}</div><p class="lbl" style="margin:0">No budget is set. Add one in Setup.</p></div>`;
+const arr=Array(D).fill(0);l.forEach(e=>arr[+e.date.slice(8,10)-1]+=e.amt);
+const bi=arr.indexOf(Math.max(...arr)),cs=byCat(l);
+const W=320,H=100,bw=W/D,mxv=Math.max(...arr,b?b/D:0)||1;
+const bars=arr.map((x,i)=>x?`<rect x="${(i*bw+1).toFixed(1)}" y="${(H-x/mxv*H).toFixed(1)}" width="${Math.max(bw-2,1).toFixed(1)}" height="${(x/mxv*H).toFixed(1)}" rx="1.5" fill="var(--accent)"/>`:'').join('');
+const ly=(H-(b?b/D:0)/mxv*H).toFixed(1);
+const line=b?`<line x1="0" x2="${W}" y1="${ly}" y2="${ly}" stroke="var(--warn)" stroke-width="1" stroke-dasharray="4 3"/>`:'';
+const lab=[1,8,15,22,D].filter((x,i,a)=>a.indexOf(x)===i&&(x===D||D-x>3)).map(x=>`<text x="${((x-1)*bw+bw/2).toFixed(1)}" y="114" font-size="9" text-anchor="middle" fill="var(--mute)">${x}</text>`).join('');
+const top=[...l].sort((a,b)=>b.amt-a.amt).slice(0,5);
+return nav+v+`<div class="grid"><div class="card stat"><span class="lbl">Daily average</span><b>${fmt(spent/days)}</b></div><div class="card stat"><span class="lbl">Biggest day</span><b>${fmt(arr[bi])}</b><span class="note">${sdate(m+'-'+p2(bi+1))}</span></div><div class="card stat"><span class="lbl">Expenses</span><b>${l.length}</b></div><div class="card stat"><span class="lbl">Top category</span><b>${esc(cs[0].c.name)}</b></div></div>
+<h2>Spending by category</h2><div class="card"><div class="stack">${cs.map(x=>`<i style="width:${x.v/spent*100}%;background:${x.c.color}"></i>`).join('')}</div>${cs.map(x=>`<div class="rw"><i class="dot" style="background:${x.c.color}"></i><span class="grow">${esc(x.c.name)}</span><span class="lbl">${Math.round(x.v/spent*100)}%</span><b>${fmt(x.v)}</b></div>`).join('')}</div>
+<h2>Spending by day</h2><div class="card"><svg viewBox="0 0 320 118" width="100%" role="img" aria-label="Spending for each day of the month">${bars}${line}${lab}</svg>${b?'<p class="note">The dashed line is the daily amount that fits your budget.</p>':''}</div>
+<h2>Biggest expenses</h2><div class="card">${top.map(e=>`<div class="rw"><i class="dot" style="background:${cat(e.cat).color}"></i><div class="grow"><div>${esc(cat(e.cat).name)}</div><div class="note" style="margin:0">${sdate(e.date)}${e.note?': '+esc(e.note):''}</div></div><b>${fmt(e.amt)}</b></div>`).join('')}</div><h2>All expenses</h2><div class="card">${[...l].sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).map(e=>`<div class="rw"><i class="dot" style="background:${cat(e.cat).color}"></i><div class="grow"><div>${esc(cat(e.cat).name)}</div><div class="note" style="margin:0">${sdate(e.date)}${e.note?': '+esc(e.note):''}</div></div><b>${fmt(e.amt)}</b><button class="btn ghost sm" data-act="del" data-id="${e.id}">Delete</button></div>`).join('')}</div>${exportCard()}`}
+
+function setup(){
+return `<h1>Setup</h1><div class="card"><label class="lbl" for="budget">Monthly budget</label>
+<div class="row"><input id="budget" class="field" type="number" inputmode="decimal" min="0" step="any" value="${S.budget||''}" placeholder="Amount"><button class="btn" data-act="savebudget">Save</button></div>
+<label class="lbl" for="cur" style="display:block;margin-top:14px">Currency</label>
+<select id="cur" class="field" style="margin-top:6px">${['INR','USD','EUR','GBP','AED'].map(c=>`<option ${c===S.cur?'selected':''}>${c}</option>`).join('')}</select></div>
+<h2>Categories</h2><div class="card">${S.cats.map(c=>`<div class="rw"><i class="dot" style="background:${c.color}"></i><span class="grow">${esc(c.name)}</span><button class="btn ghost sm" data-act="delcat" data-id="${c.id}">Remove</button></div>`).join('')}
+<div class="row" style="margin-top:12px"><input id="newcat" class="field" maxlength="24" placeholder="New category" aria-label="New category"><button class="btn" data-act="addcat">Add</button></div></div>
+<h2>Use it like an app</h2><div class="card"><p class="lbl" style="margin:0">Open this page in Chrome, tap the ⋮ menu, then Add to Home screen. For a one-tap quick-add icon, do this while you’re on the Add screen. Your data is saved on this phone, in this browser.</p></div>
+<h2>Backup</h2><div class="card"><textarea id="bk" class="field" style="min-height:90px;padding:10px" placeholder="Backup text appears here. Paste a backup here to restore it." aria-label="Backup text"></textarea>
+<div class="row"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restore">Restore</button></div></div>
+<p style="margin:22px 0 0"><button class="btn ghost" data-act="reset">Erase all data</button></p>`}
+
+const inFrame=()=>{try{return window.self!==window.top}catch(e){return true}};
+const ldate=t=>new Date(+t.slice(0,4),+t.slice(5,7)-1,+t.slice(8,10)).toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
+function getX(){const r=(document.querySelector('input[name=xr]:checked')||{}).value||'m',td=today();let from,to,label,key,st=false;
+if(r==='m'){from=rm+'-01';to=rm+'-31';label=mlabel(rm);key=rm}
+else if(r==='a'){from='0000-00-00';to='9999-99-99';label='All time';key='all';st=true}
+else{from=$('#xfrom').value;to=$('#xto').value;if(!from||!to){toast('Pick a start and end date');return null}if(from>to){toast('The start date must be before the end date');return null}label=ldate(from)+' to '+ldate(to);key=from+'_to_'+to}
+const l=S.exp.filter(e=>e.date>=from&&e.date<=to);
+if(!l.length){toast('No expenses in this range');return null}
+const ds=l.map(e=>e.date).sort(),start=r==='m'?rm+'-01':r==='a'?ds[0]:from,e0=r==='m'?rm+'-'+p2(dim(rm)):r==='a'?td:to,end=e0>td?td:e0;
+const days=Math.max(1,Math.round((Date.parse(end)-Date.parse(start))/864e5)+1),mm={};
+l.forEach(e=>{const k=e.date.slice(0,7);mm[k]=(mm[k]||0)+e.amt});
+return{l,label,key,days,cmp:r==='m',st,mm:Object.keys(mm).sort().map(k=>({k,v:mm[k]}))}}
+function repText(X){const l=X.l,sp=sum(l),b=S.budget;let t='Spend report: '+X.label+'\nTotal spent: '+fmt(sp)+'\nExpenses: '+l.length;
+if(b&&X.cmp)t+='\nBudget: '+fmt(b)+'\n'+(sp>b?'Over budget by '+fmt(sp-b):'Under budget by '+fmt(b-sp));
+if(X.mm.length>1)t+='\n\nBy month:\n'+X.mm.map(x=>mlabel(x.k)+': '+fmt(x.v)).join('\n');
+return t+'\n\nBy category:\n'+byCat(l).map(x=>x.c.name+': '+fmt(x.v)+' ('+Math.round(x.v/sp*100)+'%)').join('\n')}
+function csvText(X){const q=t=>'"'+String(t).replace(/"/g,'""')+'"';
+return 'Date,Category,Note,Amount\n'+[...X.l].sort((a,b)=>a.date.localeCompare(b.date)||a.ts-b.ts).map(e=>[e.date,q(cat(e.cat).name),q(e.note||''),e.amt].join(',')).join('\n')}
+function copyText(t,msg){const old=()=>{try{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();toast(ok?msg:'Copy is blocked here')}catch(x){toast('Copy is blocked here')}};
+try{navigator.clipboard.writeText(t).then(()=>toast(msg),old)}catch(x){old()}}
+const none=()=>!mex(rm).length&&(toast('No expenses in this month'),true);
+function shareRep(){const X=getX();if(!X)return;const t=repText(X),f=()=>copyText(t,'Report copied. Paste it into any app');
+if(!navigator.share)return f();navigator.share({title:'Spend report '+X.label,text:t}).catch(x=>{if(!x||x.name!=='AbortError')f()})}
+function copyCsv(){const X=getX();if(!X)return;copyText(csvText(X),'CSV copied. Paste it into a spreadsheet')}
+function doPrint(){if(none())return;if(inFrame())return toast('Print works in the installed app. Use Share here.');window.print()}
+function crc32(b){let t=crc32.t,c,i,k;if(!t){t=crc32.t=[];for(i=0;i<256;i++){c=i;for(k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[i]=c>>>0}}c=-1;for(i=0;i<b.length;i++)c=t[(c^b[i])&255]^(c>>>8);return(c^-1)>>>0}
+function zipFiles(files){const E=new TextEncoder(),parts=[],cd=[];let off=0;
+files.forEach(([name,txt])=>{const nb=E.encode(name),d=E.encode(txt),crc=crc32(d),h=new DataView(new ArrayBuffer(30)),c=new DataView(new ArrayBuffer(46));
+h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nb.length,true);
+c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nb.length,true);c.setUint32(42,off,true);
+parts.push(new Uint8Array(h.buffer),nb,d);cd.push(new Uint8Array(c.buffer),nb);off+=30+nb.length+d.length});
+const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cd.reduce((a,x)=>a+x.length,0),true);e.setUint32(16,off,true);
+return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+const r2=v=>Math.round(v*100)/100;
+function xlsxBook(X){
+const l=[...X.l].sort((a,b)=>a.date.localeCompare(b.date)||a.ts-b.ts),sp=r2(sum(l)),b=S.budget,cs=byCat(l),cu=S.cur;
+const NS='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',R='http://schemas.openxmlformats.org/officeDocument/2006/relationships',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+const A=[],bd=[],add=(r,bold)=>{if(bold)bd.push(A.length);A.push(r)};
+add(['Spend report',X.label],1);add(['Total spent ('+cu+')',sp]);add(['Number of expenses',l.length]);add(['Daily average ('+cu+')',r2(sp/X.days)]);add(['Monthly budget ('+cu+')',b||'']);
+if(b&&X.cmp)add(['Result',(sp>b?'Over budget by ':'Under budget by ')+cu+' '+r2(Math.abs(b-sp))]);
+add([]);add(['Category','Amount ('+cu+')','Share (%)'],1);cs.forEach(x=>add([x.c.name,r2(x.v),Math.round(x.v/sp*1000)/10]));add(['Total',sp,100]);
+if(X.mm.length>1){const sb=X.st&&b;add([]);add(['Month','Amount ('+cu+')',sb?'Status':''],1);X.mm.forEach(x=>add([mlabel(x.k),r2(x.v),sb?(x.v>b?'Over by ':'Under by ')+r2(Math.abs(b-x.v)):'']))}
+const B=[['Date','Category','Note','Amount ('+cu+')'],...l.map(e=>[e.date,cat(e.cat).name,e.note||'',r2(e.amt)]),['','','Total',sp]];
+const col=i=>String.fromCharCode(65+i),clean=t=>esc(String(t).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,''));
+const sheet=(rows,bold)=>H+'<worksheet '+NS+'><cols><col min="1" max="4" width="24" customWidth="1"/></cols><sheetData>'+rows.map((r,i)=>'<row r="'+(i+1)+'">'+r.map((v,j)=>{if(v==='')return '';const st=bold.includes(i)?' s="1"':'',ref=col(j)+(i+1);return typeof v==='number'?'<c r="'+ref+'"'+st+'><v>'+v+'</v></c>':'<c r="'+ref+'"'+st+' t="inlineStr"><is><t xml:space="preserve">'+clean(v)+'</t></is></c>'}).join('')+'</row>').join('')+'</sheetData></worksheet>';
+const rel=(id,t,tg)=>'<Relationship Id="'+id+'" Type="'+R+'/'+t+'" Target="'+tg+'"/>',ws='application/vnd.openxmlformats-officedocument.spreadsheetml.';
+return zipFiles([
+['[Content_Types].xml',H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="'+ws+'sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="'+ws+'worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="'+ws+'worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="'+ws+'styles+xml"/></Types>'],
+['_rels/.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+rel('rId1','officeDocument','xl/workbook.xml')+'</Relationships>'],
+['xl/workbook.xml',H+'<workbook '+NS+' xmlns:r="'+R+'"><sheets><sheet name="Summary" sheetId="1" r:id="rId1"/><sheet name="Expenses" sheetId="2" r:id="rId2"/></sheets></workbook>'],
+['xl/_rels/workbook.xml.rels',H+'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+rel('rId1','worksheet','worksheets/sheet1.xml')+rel('rId2','worksheet','worksheets/sheet2.xml')+rel('rId3','styles','styles.xml')+'</Relationships>'],
+['xl/styles.xml',H+'<styleSheet '+NS+'><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+['xl/worksheets/sheet1.xml',sheet(A,bd)],
+['xl/worksheets/sheet2.xml',sheet(B,[0])]])}
+const pt=t=>String(t).split('').map(c=>{const k=c.charCodeAt(0);return k===92||k===40||k===41?'\\'+c:(k>=32&&k<=126)||(k>=160&&k<=255)?c:'?'}).join('');
+function pdfBuild(pages){const o=[null,'<</Type/Catalog/Pages 2 0 R>>','','<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>','<</Type/Font/Subtype/Type1/BaseFont/Helvetica-Bold/Encoding/WinAnsiEncoding>>'],kids=[];
+pages.forEach((c,i)=>{const cid=5+i*2,pid=6+i*2;kids.push(pid+' 0 R');o[cid]='<</Length '+c.length+'>>\nstream\n'+c+'\nendstream';o[pid]='<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</Font<</F1 3 0 R/F2 4 0 R>>>>/Contents '+cid+' 0 R>>'});
+o[2]='<</Type/Pages/Kids['+kids.join(' ')+']/Count '+pages.length+'>>';
+let out='%PDF-1.4\n';const off=[];
+for(let i=1;i<o.length;i++){off[i]=out.length;out+=i+' 0 obj\n'+o[i]+'\nendobj\n'}
+const x=out.length;out+='xref\n0 '+o.length+'\n0000000000 65535 f \n'+off.slice(1).map(v=>String(v).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<</Size '+o.length+'/Root 1 0 R>>\nstartxref\n'+x+'\n%%EOF';
+const u=new Uint8Array(out.length);for(let i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;return new Blob([u],{type:'application/pdf'})}
+function pdfReport(X){
+const l=[...X.l].sort((a,b)=>a.date.localeCompare(b.date)||a.ts-b.ts),sp=sum(l),b=S.budget,cs=byCat(l),cu=S.cur;
+const nf=new Intl.NumberFormat(loc(),{minimumFractionDigits:2,maximumFractionDigits:2}),n2=v=>nf.format(v).split('\u00a0').join(' ');
+const W=t=>[...t].reduce((a,c)=>a+(/\d/.test(c)?.556:/[A-Z]/.test(c)?.68:/[a-z]/.test(c)?.5:c==='%'?.889:c==='-'||c==='('||c===')'?.333:.278),0),tr=(t,n)=>t.length>n?t.slice(0,n-3)+'...':t;
+const pg=[[]];let y=790;
+const T=(t,x,s,bd,r)=>pg[pg.length-1].push('BT /F'+(bd?2:1)+' '+s+' Tf '+(r?r-W(t)*s:x).toFixed(1)+' '+y+' Td ('+pt(t)+') Tj ET');
+const nl=h=>{y-=h;if(y<60){pg.push([]);y=790}};
+T('Spend report',48,20,1);nl(22);T(X.label,48,12);nl(28);
+const sm=[['Total spent',cu+' '+n2(sp)],['Expenses logged',String(l.length)],['Daily average',cu+' '+n2(sp/X.days)],['Monthly budget',b?cu+' '+n2(b):'Not set']];
+if(b&&X.cmp)sm.push(['Result',(sp>b?'Over budget by ':'Under budget by ')+cu+' '+n2(Math.abs(b-sp))]);
+sm.forEach(([k,v])=>{T(k,48,11,1);T(v,170,11);nl(17)});
+if(X.mm.length>1){const sb=X.st&&b;nl(10);T('By month',48,13,1);nl(18);T('Month',48,10,1);if(sb)T('Status',200,10,1);T('Amount ('+cu+')',0,10,1,547);nl(15);
+X.mm.forEach(x=>{T(mlabel(x.k),48,10);if(sb)T((x.v>b?'Over by ':'Under by ')+n2(Math.abs(b-x.v)),200,10);T(n2(x.v),0,10,0,547);nl(14)})}
+nl(10);T('By category',48,13,1);nl(18);T('Category',48,10,1);T('Share',0,10,1,400);T('Amount ('+cu+')',0,10,1,547);nl(15);
+cs.forEach(x=>{T(tr(x.c.name,34),48,10);T(Math.round(x.v/sp*100)+'%',0,10,0,400);T(n2(x.v),0,10,0,547);nl(14)});
+nl(12);T('Expenses',48,13,1);nl(18);T('Date',48,10,1);T('Category',110,10,1);T('Note',235,10,1);T('Amount ('+cu+')',0,10,1,547);nl(15);
+l.forEach(e=>{T(e.date,48,9.5);T(tr(cat(e.cat).name,24),110,9.5);T(tr(e.note||'',30),235,9.5);T(n2(e.amt),0,9.5,0,547);nl(14)});
+nl(4);T('Total',235,10,1);T(n2(sp),0,10,1,547);
+pg.forEach((p,i)=>p.push('BT /F1 8 Tf 48 30 Td (Page '+(i+1)+' of '+pg.length+') Tj ET'));
+return pdfBuild(pg.map(p=>p.join('\n')))}
+async function saveFile(blob,name){
+let d=null;try{if(window.claude&&claude.use)d=await claude.use('downloads')}catch(e){}
+if(d){await d.save({filename:name,data:blob});return}
+if(inFrame())throw {code:'unavailable'};
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+await new Promise(r=>setTimeout(r,800));URL.revokeObjectURL(a.href)}
+async function doExport(){const p=$('#xpdf').checked,x=$('#xxls').checked;
+if(!p&&!x)return toast('Choose PDF, Excel or both');
+const X=getX();if(!X)return;
+const jobs=[];if(p)jobs.push([()=>pdfReport(X),'spend-report-'+X.key+'.pdf','PDF report']);if(x)jobs.push([()=>xlsxBook(X),'spend-expenses-'+X.key+'.xlsx','Excel file']);
+for(const [f,n,l] of jobs){for(let k=0;k<4;k++){try{await saveFile(f(),n);toast(l+' saved');break}catch(e){const c=e&&e.code;
+if(c==='rate_limited'&&k<3){await new Promise(r=>setTimeout(r,1500));continue}
+if(c==='unavailable'||c==='not_granted'||c==='capability_disabled'||c==='capability_removed'){toast('Saving files isn’t available here. Use Share summary or Copy CSV.');return}
+toast(c==='declined'?l+' not saved':'Could not save the '+l+' ('+(c||(e&&e.message)||'error')+')');break}}}}
+function exportCard(){const f=rm+'-01',t=rm===mk(now)?today():rm+'-'+p2(dim(rm));
+return `<h2 class="noprint">Export</h2><div class="card noprint"><p class="lbl" style="margin:0 0 4px">Which expenses?</p>
+<label class="chk"><input type="radio" name="xr" value="m" checked>Month shown (${mlabel(rm)})</label>
+<label class="chk"><input type="radio" name="xr" value="c">Custom range</label>
+<div class="row"><input id="xfrom" class="field" type="date" value="${f}" disabled aria-label="From date"><input id="xto" class="field" type="date" value="${t}" disabled aria-label="To date"></div>
+<label class="chk"><input type="radio" name="xr" value="a">Entire history</label>
+<p class="lbl" style="margin:12px 0 4px">File type</p>
+<label class="chk"><input type="checkbox" id="xpdf" checked>PDF report</label><label class="chk"><input type="checkbox" id="xxls" checked>Excel file (.xlsx)</label>
+<div class="row ex"><button class="btn" data-act="export">Export</button><button class="btn ghost" data-act="share">Share summary</button></div>
+<div class="row ex"><button class="btn ghost" data-act="print">Print month</button><button class="btn ghost" data-act="copycsv">Copy CSV</button></div>
+<p class="note">The range applies to Export, Share summary and Copy CSV.</p></div>`}
+const views={home,add,report,setup};
+function render(){
+now=new Date();
+const h=location.hash.slice(1),v=views[h]?h:'home';
+if(v==='report'&&lastView!=='report'){if(!keepRm||!rm)rm=mk(now);keepRm=false}
+lastView=v;
+app.innerHTML=views[v]();
+document.querySelectorAll('.tabs a').forEach(a=>a.dataset.v===v?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+if(v==='add')setTimeout(()=>{const a=$('#amt');if(a)a.focus()},60);else window.scrollTo(0,0)}
+
+document.addEventListener('click',e=>{
+const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,id=t.dataset.id;
+if(a==='pick'){addCat=id;document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c===t));$('#amt').focus()}
+else if(a==='save')saveExp();
+else if(a==='del')arm(t,'e'+id,()=>{S.exp=S.exp.filter(x=>x.id!==id);save();render()});
+else if(a==='delcat')arm(t,'c'+id,()=>{S.cats=S.cats.filter(x=>x.id!==id);save();render()});
+else if(a==='addcat'){const n=$('#newcat').value.trim();if(!n)return toast('Type a category name');
+if(S.cats.some(c=>c.name.toLowerCase()===n.toLowerCase()))return toast('That category already exists');
+S.cats.push({id:'c'+Date.now(),name:n,color:COLORS[S.cats.length%COLORS.length]});save();render();toast('Category added')}
+else if(a==='savebudget'){S.budget=Math.max(0,parseFloat($('#budget').value)||0);save();toast(S.budget?'Budget set to '+fmt(S.budget):'Budget cleared')}
+else if(a==='prevm'){rm=shift(rm,-1);render()}
+else if(a==='nextm'){if(rm<mk(now)){rm=shift(rm,1);render()}}
+else if(a==='openprev'){rm=shift(mk(new Date()),-1);keepRm=true;location.hash='report'}
+else if(a==='backup'){const j=JSON.stringify(S);$('#bk').value=j;try{navigator.clipboard.writeText(j).then(()=>toast('Backup copied'),()=>toast('Select the text and copy it'))}catch(x){toast('Select the text and copy it')}}
+else if(a==='restore'){try{const d=JSON.parse($('#bk').value);if(!d||!Array.isArray(d.exp)||!Array.isArray(d.cats))throw 0;S=d;save();render();toast('Backup restored')}catch(x){toast('That backup text isn’t valid')}}
+else if(a==='share')shareRep();
+else if(a==='export')doExport();
+else if(a==='copycsv')copyCsv();
+else if(a==='print')doPrint();
+else if(a==='reset')arm(t,'reset',()=>{init(true);save();render();toast('All data erased')});
+});
+document.addEventListener('change',e=>{if(e.target.name==='xr'){const c=e.target.value==='c';$('#xfrom').disabled=!c;$('#xto').disabled=!c}if(e.target.id==='cur'){S.cur=e.target.value;save();toast('Currency changed to '+S.cur)}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const i=e.target.id;
+if(i==='amt'||i==='note')saveExp();else if(i==='newcat')document.querySelector('[data-act=addcat]').click();else if(i==='budget')document.querySelector('[data-act=savebudget]').click()});
+window.addEventListener('hashchange',render);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&lastView!=='add')render()});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+init();render();
+})();
+</script>
+</body>
+</html>
